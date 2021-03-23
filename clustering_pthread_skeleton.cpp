@@ -28,6 +28,9 @@ void *parallel(void* allthings){
 
 //    printf("Hello from %d of %d\n", all->my_rank, all->num_threads);
 
+    // two stages:
+    // stage 1: find the cores/pivots
+    // stage 2: expand the clusters from cores/pivots by DFS or BFS
     return 0;
 }
 
@@ -36,7 +39,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     pthread_t* thread_handles = (pthread_t*) malloc(num_threads*sizeof(pthread_t));
     int *cluster_result = new int[num_vs];
 
-    for (thread=0; thread < num_threads; thread++)
+    for (thread = 0; thread < num_threads; thread++)
         pthread_create(&thread_handles[thread], NULL, parallel, (void *) new AllThings(
                 num_threads, thread));
     for (thread=0; thread < num_threads; thread++)
