@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:clustering_pthread_skeleton.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:clustering_sequential.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:clustering.h">
+   </FileRef>
+   <FileRef
+      location = "group:main.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:results">
+   </FileRef>
+   <FileRef
+      location = "group:workspace.xcworkspace">
+   </FileRef>
+</Workspace>
