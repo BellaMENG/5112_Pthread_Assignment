@@ -73,7 +73,10 @@ void *parallel(void* allthings){
     }
         
     // stage 2: expand the clusters from cores/pivots by DFS or BFS
-    
+    // use DFS to traverse all pivots and assign cluster id to them
+    // problem is how to perform dfs with multi-thread
+    // Boost graph distributed algorithms
+    // use an array to record the connectivity
     return 0;
 }
 
