@@ -17,6 +17,9 @@ int global_num_vs, global_num_es, *global_nbr_offs = nullptr, *global_nbrs = nul
 
 float global_epsilon;
 int global_mu;
+bool *pivots = nullptr;
+int *num_sim_nbrs = nullptr;
+int **sim_nbrs = nullptr;
 
 struct AllThings{
     int num_threads;
@@ -41,10 +44,6 @@ void *parallel(void* allthings){
     int end = (all->my_rank + 1)*local_num_vs;
     if (end > global_num_vs)
         end = global_num_vs;
-    
-    bool *pivots = new bool[global_num_vs]();
-    int *num_sim_nbrs = new int[global_num_vs]();
-    int **sim_nbrs = new int*[global_num_vs];
     
     for (int i = start; i < end; ++i) {
         int *left_start = &global_nbrs[global_nbr_offs[i]];
@@ -72,8 +71,9 @@ void *parallel(void* allthings){
         }
         if (num_sim_nbrs[i] > global_mu) pivots[i] = true;
     }
+        
     // stage 2: expand the clusters from cores/pivots by DFS or BFS
-    du
+    
     return 0;
 }
 
@@ -86,16 +86,28 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     global_epsilon = epsilon;
     global_mu = mu;
     
+    pivots = (bool*)malloc(num_vs*sizeof(bool));
+    num_sim_nbrs = (int*)malloc(num_vs*sizeof(int));
+    sim_nbrs = (int**)malloc(num_vs*sizeof(int));
+    
     long thread;
     pthread_t* thread_handles = (pthread_t*) malloc(num_threads*sizeof(pthread_t));
     int *cluster_result = new int[num_vs];
     
     for (thread = 0; thread < num_threads; thread++)
-    pthread_create(&thread_handles[thread], NULL, parallel, (void *) new AllThings(
-                                                                                   num_threads, thread));
+    pthread_create(&thread_handles[thread], NULL, parallel, (void *) new AllThings(num_threads, thread));
+    
     for (thread=0; thread < num_threads; thread++)
     pthread_join(thread_handles[thread], NULL);
     
+#if DEBUG
+    if (global_num_vs <= 50) {
+        for (int i = 0; i < global_num_vs; ++i) {
+            std::cout << pivots[i] << " ";
+        }
+        cout << endl;
+    }
+#endif
     return cluster_result;
 }
 
