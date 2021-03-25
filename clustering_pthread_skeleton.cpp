@@ -100,7 +100,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     for (thread=0; thread < num_threads; thread++)
     pthread_join(thread_handles[thread], NULL);
     
-#if DEBUG
+#ifdef DEBUG
     if (global_num_vs <= 50) {
         for (int i = 0; i < global_num_vs; ++i) {
             std::cout << pivots[i] << " ";

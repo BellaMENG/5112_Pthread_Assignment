@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
         }
         if (num_sim_nbrs[i] > mu) pivots[i] = true;
     }
-#if DEBUG
+#ifdef DEBUG
     // print the results of stage 1:
     if (num_vs <= 50) {
         for (int i = 0; i < num_vs; ++i) {
