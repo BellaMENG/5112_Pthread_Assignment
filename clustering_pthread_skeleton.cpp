@@ -77,6 +77,8 @@ void *parallel(void* allthings){
     // problem is how to perform dfs with multi-thread
     // Boost graph distributed algorithms
     // use an array to record the connectivity
+    // agglomerative clustering?
+    // greedy agglomerative method introduced by Clauset et al.
     return 0;
 }
 
