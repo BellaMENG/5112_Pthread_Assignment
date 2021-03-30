@@ -22,7 +22,8 @@ int num_pivots;
 bool *pivots = nullptr;
 int *num_sim_nbrs = nullptr;
 int **sim_nbrs = nullptr;
-int *rank = nullptr;
+
+int *parent = nullptr;
 int *index2node = nullptr;
 pthread_rwlock_t    rwlock;
 
@@ -69,11 +70,41 @@ void findPivots(int local_num_vs, int start, int end) {
 
 }
 
+
+void make_set(int* parent, int v) {
+    parent[v] = v;
+}
+
+int find_set(int* parent, int v) {
+    if (v == parent[v])
+        return v;
+    return parent[v] = find_set(parent, parent[v]);
+}
+
+void union_sets(int* parent, int v, int w) {
+    v = find_set(parent, v);
+    w = find_set(parent, w);
+    if (v != w) {
+        if (v > w)
+            parent[v] = w;
+        else
+            parent[w] = v;
+    }
+}
+
+void print_cluster_result(int* parent, int size) {
+    for (int i = 0; i < size; ++i) {
+        cout << find_set(parent, i) << " ";
+    }
+    cout << endl;
+}
+
 void *clusterPivots(void* allthings) {
     AllThings *all = (AllThings *) allthings;
     
     return 0;
 }
+
 
 void *parallel(void* allthings){
     AllThings *all = (AllThings *) allthings;
@@ -136,7 +167,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
             index++;
         }
     }
-    
+    parent = (int*)malloc(pivots)
     for (thread = 0; thread < num_threads; thread++) {
         pthread_create(&thread_handles[thread], NULL, clusterPivots, (void *) new AllThings(num_threads, thread));
     }
