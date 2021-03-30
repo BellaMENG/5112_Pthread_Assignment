@@ -11,15 +11,20 @@
  */
 
 #include <pthread.h>
+#include <boost/pending/detail/disjoint_sets.hpp>
 #include "clustering.h"
 
 int global_num_vs, global_num_es, *global_nbr_offs = nullptr, *global_nbrs = nullptr;
 
 float global_epsilon;
 int global_mu;
+int num_pivots;
 bool *pivots = nullptr;
 int *num_sim_nbrs = nullptr;
 int **sim_nbrs = nullptr;
+int *rank = nullptr;
+int *index2node = nullptr;
+pthread_rwlock_t    rwlock;
 
 struct AllThings{
     int num_threads;
@@ -31,20 +36,7 @@ struct AllThings{
     };
 };
 
-void *parallel(void* allthings){
-    AllThings *all = (AllThings *) allthings;
-    
-    //    printf("Hello from %d of %d\n", all->my_rank, all->num_threads);
-    
-    // hints: union-found, set prioriteis, drawer principles
-    // two stages:
-    // stage 1: find the cores/pivots
-    int local_num_vs = global_num_vs/all->num_threads + 1;
-    int start = all->my_rank*local_num_vs;
-    int end = (all->my_rank + 1)*local_num_vs;
-    if (end > global_num_vs)
-        end = global_num_vs;
-    
+void findPivots(int local_num_vs, int start, int end) {
     for (int i = start; i < end; ++i) {
         int *left_start = &global_nbrs[global_nbr_offs[i]];
         int *left_end = &global_nbrs[global_nbr_offs[i + 1]];
@@ -69,9 +61,33 @@ void *parallel(void* allthings){
                 num_sim_nbrs[i]++;
             }
         }
-        if (num_sim_nbrs[i] > global_mu) pivots[i] = true;
+        if (num_sim_nbrs[i] > global_mu) {
+            num_pivots++;
+            pivots[i] = true;
+        }
     }
+
+}
+
+void *clusterPivots(void* allthings) {
+    AllThings *all = (AllThings *) allthings;
+    
+    return 0;
+}
+
+void *parallel(void* allthings){
+    AllThings *all = (AllThings *) allthings;
         
+    // hints: union-found, set prioriteis, drawer principles
+    // two stages:
+    // stage 1: find the cores/pivots
+    int local_num_vs = global_num_vs/all->num_threads + 1;
+    int start = all->my_rank*local_num_vs;
+    int end = (all->my_rank + 1)*local_num_vs;
+    if (end > global_num_vs)
+        end = global_num_vs;
+    
+    findPivots(local_num_vs, start, end);
     // stage 2: expand the clusters from cores/pivots by DFS or BFS
     // use DFS to traverse all pivots and assign cluster id to them
     // problem is how to perform dfs with multi-thread
@@ -79,6 +95,8 @@ void *parallel(void* allthings){
     // use an array to record the connectivity
     // agglomerative clustering?
     // greedy agglomerative method introduced by Clauset et al.
+    
+    // how to remember the linking between different threads?
     return 0;
 }
 
@@ -90,20 +108,43 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     global_nbrs = nbrs;
     global_epsilon = epsilon;
     global_mu = mu;
+    num_pivots = 0;
     
     pivots = (bool*)malloc(num_vs*sizeof(bool));
     num_sim_nbrs = (int*)malloc(num_vs*sizeof(int));
     sim_nbrs = (int**)malloc(num_vs*sizeof(int));
     
+    pthread_rwlock_init(&rwlock, NULL);
+    
     long thread;
     pthread_t* thread_handles = (pthread_t*) malloc(num_threads*sizeof(pthread_t));
     int *cluster_result = new int[num_vs];
     
-    for (thread = 0; thread < num_threads; thread++)
-    pthread_create(&thread_handles[thread], NULL, parallel, (void *) new AllThings(num_threads, thread));
+    for (thread = 0; thread < num_threads; thread++) {
+        pthread_create(&thread_handles[thread], NULL, parallel, (void *) new AllThings(num_threads, thread));
+    }
     
-    for (thread=0; thread < num_threads; thread++)
-    pthread_join(thread_handles[thread], NULL);
+    for (thread = 0; thread < num_threads; thread++) {
+        pthread_join(thread_handles[thread], NULL);
+    }
+    
+    index2node = (int*)malloc(num_pivots*sizeof(int));
+    int index = 0;
+    for (int i = 0; i < num_vs; ++i) {
+        if (pivots[i] == true) {
+            index2node[index] = i;
+            index++;
+        }
+    }
+    
+    for (thread = 0; thread < num_threads; thread++) {
+        pthread_create(&thread_handles[thread], NULL, clusterPivots, (void *) new AllThings(num_threads, thread));
+    }
+    
+    for (thread = 0; thread < num_threads; thread++) {
+        pthread_join(thread_handles[thread], NULL);
+    }
+    
     
 #ifdef DEBUG
     if (global_num_vs <= 50) {
@@ -115,6 +156,4 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
 #endif
     return cluster_result;
 }
-
-
 
