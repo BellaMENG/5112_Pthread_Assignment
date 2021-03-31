@@ -75,9 +75,9 @@ void findPivots(int local_num_vs, int start, int end) {
 
 
 void make_set(int* parent, int v) {
-    pthread_rwlock_wrlock(&rwlock);
+//    pthread_rwlock_wrlock(&rwlock);
     parent[v] = v;
-    pthread_rwlock_unlock(&rwlock);
+//    pthread_rwlock_unlock(&rwlock);
 }
 
 int find_set(int* parent, int v) {
@@ -87,17 +87,17 @@ int find_set(int* parent, int v) {
 }
 
 void union_sets(int* parent, int v, int w) {
-    pthread_rwlock_wrlock(&rwlock);
+//    pthread_rwlock_wrlock(&rwlock);
     v = find_set(parent, v);
     w = find_set(parent, w);
-    pthread_rwlock_unlock(&rwlock);
+//    pthread_rwlock_unlock(&rwlock);
     if (v != w) {
-        pthread_rwlock_wrlock(&rwlock);
+//        pthread_rwlock_wrlock(&rwlock);
         if (v > w)
             parent[v] = w;
         else
             parent[w] = v;
-        pthread_rwlock_unlock(&rwlock);
+//        pthread_rwlock_unlock(&rwlock);
     }
 }
 
@@ -122,7 +122,9 @@ void dfs(int cur_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *vi
         int nbr_index = node2index[nbr_id];
         if ((pivots[nbr_id])&&(!visited[nbr_index])) {
             visited[nbr_index] = true;
+            pthread_mutex_lock(&mutex);
             union_sets(parent, cur_id, nbr_index);
+            pthread_mutex_unlock(&mutex);
             dfs(nbr_id, cluster_id, num_sim_nbrs, sim_nbrs, visited, pivots, parent);
         }
     }
@@ -228,6 +230,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
         make_set(parent, i);
     }
     print_cluster_result(parent, num_pivots);
+    
     for (thread = 0; thread < num_threads; thread++) {
         pthread_create(&thread_handles[thread], NULL, clusterPivots, (void *) new AllThings(num_threads, thread));
     }
