@@ -29,10 +29,10 @@ int main(int argc, char **argv) {
 
     auto start_clock = chrono::high_resolution_clock::now();
 
-#ifdef DEBUG
-    int cluster_result[1] = {-1};
-    int num_clusters = 0;
-#else
+//#ifdef DEBUG
+//    int cluster_result[1] = {-1};
+//    int num_clusters = 0;
+//#else
     int *cluster_result = scan(epsilon, mu, num_threads, num_vs, num_es, nbr_offs, nbrs);
 
     int num_clusters = 0;
@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
         if (cluster_result[i] == i)
             num_clusters ++;
     }
-#endif
+//#endif
     
     auto end_clock = chrono::high_resolution_clock::now();
     chrono::duration<double> diff = end_clock - start_clock;
