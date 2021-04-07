@@ -29,6 +29,7 @@ int *parent = nullptr;
 //int *node2index = nullptr;
 pthread_rwlock_t    rwlock;
 pthread_mutex_t union_mutex;
+pthread_barrier_t barrier;
 
 using namespace std;
 
@@ -181,6 +182,7 @@ void *parallel(void* allthings){
         end = global_num_vs;
     
     findPivots(local_num_vs, start, end);
+    pthread_barrier_wait(&barrier);
     // stage 2: cluster pivots
     return 0;
 }
@@ -196,11 +198,12 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     num_pivots = 0;
     
     pivots = (bool*)malloc(num_vs*sizeof(bool));
-    num_sim_nbrs = (int*)malloc(num_vs*sizeof(int));
+    num_sim_nbrs = (int*)calloc(num_vs, sizeof(int));
     sim_nbrs = (int**)malloc(num_vs*sizeof(int));
     
     pthread_rwlock_init(&rwlock, NULL);
     pthread_mutex_init(&union_mutex, NULL);
+    pthread_barrier_init(&barrier, NULL, num_threads);
     
     long thread;
     pthread_t* thread_handles = (pthread_t*) malloc(num_threads*sizeof(pthread_t));
@@ -231,11 +234,14 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     }
 #endif
 
-    parent = (int*)malloc(num_pivots * sizeof(int));
+    parent = (int*)malloc(num_vs * sizeof(int));
     visited = new bool[num_vs]();
 
-    for (int i = 0; i < num_pivots; ++i) {
-        make_set(parent, i);
+    for (int i = 0; i < num_vs; ++i) {
+        if (pivots[i])
+            make_set(parent, i);
+        else
+            parent[i] = -1;
     }
     print_cluster_result(parent, num_pivots);
     
@@ -248,12 +254,13 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
         pthread_join(thread_handles[thread], NULL);
     }
 #ifdef DEBUG
-    print_cluster_result(parent, num_pivots);
-    print_cluster_result(parent, num_pivots);
+    print_cluster_result(parent, num_vs);
+    print_cluster_result(parent, num_vs);
 #endif
     
     pthread_rwlock_destroy(&rwlock);
     pthread_mutex_destroy(&union_mutex);
+    pthread_barrier_destroy(&barrier);
     free(thread_handles);
     return cluster_result;
 }

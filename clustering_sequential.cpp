@@ -29,7 +29,6 @@ void expansion(int cur_id, int num_clusters, int *num_sim_nbrs, int **sim_nbrs,
     }
 }
 
-
 int main(int argc, char **argv) {
     assert(argc > 3 && "Usage: ./sequential <dataset_path> <epsilon> <mu>");
     
