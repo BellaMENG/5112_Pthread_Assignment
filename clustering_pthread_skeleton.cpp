@@ -194,17 +194,25 @@ void *parallel(void* allthings){
     pthread_barrier_wait(&barrier);
 //    cout << sim_nbrs[14][0] << endl;
     
+//    for (int i = start; i < end; ++i) {
+//        if (pivots[i])
+//            make_set(parent, i);
+//        else
+//            parent[i] = -1;
+//    }
+    pthread_mutex_lock(&union_mutex);
     for (int i = start; i < end; ++i) {
-        if (pivots[i])
-            make_set(parent, i);
-        else
+        if (pivots[i]) {
+            parent[i] = i;
+        } else {
             parent[i] = -1;
+        }
     }
     
+    pthread_mutex_unlock(&union_mutex);
     pthread_barrier_wait(&barrier);
     cout << "here" << endl;
     cout << sim_nbrs[13][0] << endl;
-    cout << sim_nbrs[15][0] << endl;
     cout << sim_nbrs[14][0] << endl;
     clusterPivots(start, end);
     pthread_barrier_wait(&barrier);
