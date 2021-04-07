@@ -109,38 +109,6 @@ void print_cluster_result(int* parent, int size) {
     cout << endl;
 }
 
-void dfs(int curr_id, int cluster_id, int start, int end) {
-    pthread_rwlock_wrlock(&rwlock);
-    visited[curr_id] = true;
-    pthread_rwlock_unlock(&rwlock);
-    for (int i = num_sim_nbrs[curr_id] - 1; i >= 0; --i) {
-        int nbr_id = sim_nbrs[curr_id][i];
-        if (nbr_id < curr_id)
-            continue;
-//        cout << "curr_id and nbr_id: " << curr_id << " " << nbr_id << endl;
-        if (pivots[nbr_id] && !visited[nbr_id]) {
-            pthread_rwlock_wrlock(&rwlock);
-            cout << "union_set: " << curr_id << " and " << nbr_id << endl;
-            union_sets(parent, curr_id, nbr_id);
-            pthread_rwlock_unlock(&rwlock);
-            dfs(nbr_id, cluster_id, start, end);
-        }
-    }
-}
-
-void clusterPivots(int start, int end) {
-    
-    for (int i = start; i < end; ++i) {
-        if (visited[i] || !pivots[i])
-            continue;
-        visited[i] = true;
-        dfs(i, i, start, end);
-    }
-    for (int i = start; i < end; ++i) {
-        if (!visited[i] && pivots[i])
-            dfs(i, i, start, end);
-    }
-}
 
 void clusteringEdges(int start, int end) {
     for (int i = start; i < end; ++i) {
@@ -151,9 +119,7 @@ void clusteringEdges(int start, int end) {
             if (nbr_id <= i || !pivots[nbr_id])
                 continue;
             pthread_rwlock_wrlock(&rwlock);
-//            cout << "union_set: " << i << " and " << nbr_id << endl;
             union_sets(parent, i, nbr_id);
-//            cout << parent[21] << endl;
             pthread_rwlock_unlock(&rwlock);
         }
     }
