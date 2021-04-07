@@ -184,6 +184,14 @@ void *parallel(void* allthings){
     
     findPivots(local_num_vs, start, end);
     pthread_barrier_wait(&barrier);
+    
+    for (int i = start; i < end; ++i) {
+        std::cout << "node " << i << ": " << pivots[i] << "   ";
+        for (int j = 0; j < num_sim_nbrs[i]; ++j) {
+            std::cout << sim_nbrs[i][j] << " ";
+        }
+        cout << endl;
+    }
     for (int i = start; i < end; ++i) {
         if (pivots[i])
             make_set(parent, i);
@@ -237,17 +245,10 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
         cout << endl;
     }
     
-    for (int i = 0; i < global_num_vs; ++i) {
-        std::cout << "node " << i << ": " << pivots[i] << "   ";
-        for (int j = 0; j < num_sim_nbrs[i]; ++j) {
-            std::cout << sim_nbrs[i][j] << " ";
-        }
-        cout << endl;
-    }
 #endif
 
     
-    cout << sim_nbrs[14][0] << endl;
+//    cout << sim_nbrs[14][0] << endl;
 //    for (thread = 0; thread < num_threads; thread++) {
 //        pthread_create(&thread_handles[thread], NULL, clusterPivots, (void *) new AllThings(num_threads, thread));
 //    }
