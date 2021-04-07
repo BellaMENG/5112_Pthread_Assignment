@@ -120,10 +120,12 @@ void dfs(int curr_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *v
         int nbr_id = sim_nbrs[curr_id][i];
         
         if (pivots[nbr_id] && !visited[nbr_id]) {
+            
             pthread_rwlock_wrlock(&rwlock);
             visited[nbr_id] = true;
             union_sets(parent, curr_id, nbr_id);
             pthread_rwlock_unlock(&rwlock);
+            
             dfs(nbr_id, cluster_id, num_sim_nbrs, sim_nbrs, visited, pivots, parent);
         }
     }
@@ -131,7 +133,6 @@ void dfs(int curr_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *v
 
 void clusterPivots(int start, int end) {
 
-    
     for (int i = start; i < end; ++i) {
         if (visited[i] || !pivots[i])
             continue;
@@ -166,7 +167,6 @@ void *parallel(void* allthings){
         }
     }
     
-//    pthread_mutex_unlock(&union_mutex);
     pthread_barrier_wait(&barrier);
     clusterPivots(start, end);
     pthread_barrier_wait(&barrier);
