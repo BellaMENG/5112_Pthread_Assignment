@@ -115,8 +115,7 @@ void dfs(int curr_id, int cluster_id, int start, int end) {
             visited[nbr_id] = true;
             
             pthread_rwlock_wrlock(&rwlock);
-            if (nbr_id == 2)
-                cout << "nbr_id == 2" << endl;
+            cout << "union_set: " << curr_id << " and " << nbr_id << endl;
             union_sets(parent, curr_id, nbr_id);
             pthread_rwlock_unlock(&rwlock);
             dfs(nbr_id, cluster_id, start, end);
