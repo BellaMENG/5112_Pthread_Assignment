@@ -143,8 +143,8 @@ void clusterPivots(int start, int end) {
 }
 
 void clusteringEdges(int start, int end) {
-    cout << parent[18] << endl;
     for (int i = start; i < end; ++i) {
+        cout << parent[18] << endl;
         if (!pivots[i])
             continue;
         for (int j = 0; j < num_sim_nbrs[i]; ++j) {
