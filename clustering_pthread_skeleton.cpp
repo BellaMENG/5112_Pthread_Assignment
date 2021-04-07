@@ -138,7 +138,7 @@ void dfs(int curr_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *v
 }
 
 void *clusterPivots(void* allthings) {
-    cout << "in clusterPivots: " << sim_nbrs[12][0] << endl;
+    cout << "in clusterPivots: " << sim_nbrs[14][0] << endl;
     AllThings *all = (AllThings *) allthings;
 //    pthread_rwlock_rdlock(&rwlock);
     int local_n = global_num_vs/all->num_threads + 1;
@@ -147,7 +147,7 @@ void *clusterPivots(void* allthings) {
     if (end > global_num_vs)
         end = global_num_vs;
     
-    cout << "in clusterPivots: " << sim_nbrs[12][0] << endl;
+    cout << "in clusterPivots: " << sim_nbrs[14][0] << endl;
     for (int i = 0; i < global_num_vs; ++i) {
         std::cout << "node " << i << ": " << pivots[i] << "   ";
         for (int j = 0; j < num_sim_nbrs[i]; ++j) {
@@ -184,6 +184,13 @@ void *parallel(void* allthings){
     
     findPivots(local_num_vs, start, end);
     pthread_barrier_wait(&barrier);
+    for (int i = start; i < end; ++i) {
+        if (pivots[i])
+            make_set(parent, i);
+        else
+            parent[i] = -1;
+    }
+    pthread_barrier_wait(&barrier);
     // stage 2: cluster pivots
     return 0;
 }
@@ -202,6 +209,9 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     num_sim_nbrs = (int*)calloc(num_vs, sizeof(int));
     sim_nbrs = (int**)malloc(num_vs*sizeof(int));
     
+    parent = (int*)malloc(num_vs * sizeof(int));
+    visited = new bool[num_vs]();
+
     pthread_rwlock_init(&rwlock, NULL);
     pthread_mutex_init(&union_mutex, NULL);
     pthread_barrier_init(&barrier, NULL, num_threads);
@@ -217,6 +227,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
         pthread_join(thread_handles[thread], NULL);
     }
     
+
 #ifdef DEBUG
     cout << "global_num_vs: " << global_num_vs << endl;
     if (global_num_vs <= 50) {
@@ -235,25 +246,15 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     }
 #endif
 
-    parent = (int*)malloc(num_vs * sizeof(int));
-    visited = new bool[num_vs]();
-
-    for (int i = 0; i < num_vs; ++i) {
-        if (pivots[i])
-            make_set(parent, i);
-        else
-            parent[i] = -1;
-    }
-    print_cluster_result(parent, num_pivots);
     
-    cout << sim_nbrs[12][0] << endl;
-    for (thread = 0; thread < num_threads; thread++) {
-        pthread_create(&thread_handles[thread], NULL, clusterPivots, (void *) new AllThings(num_threads, thread));
-    }
-    
-    for (thread = 0; thread < num_threads; thread++) {
-        pthread_join(thread_handles[thread], NULL);
-    }
+    cout << sim_nbrs[14][0] << endl;
+//    for (thread = 0; thread < num_threads; thread++) {
+//        pthread_create(&thread_handles[thread], NULL, clusterPivots, (void *) new AllThings(num_threads, thread));
+//    }
+//
+//    for (thread = 0; thread < num_threads; thread++) {
+//        pthread_join(thread_handles[thread], NULL);
+//    }
 #ifdef DEBUG
     print_cluster_result(parent, num_vs);
     print_cluster_result(parent, num_vs);
