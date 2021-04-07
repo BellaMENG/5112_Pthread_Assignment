@@ -135,6 +135,10 @@ void clusterPivots(int start, int end) {
         visited[i] = true;
         dfs(i, i, start, end);
     }
+    for (int i = start; i < end; ++i) {
+        if (!visited[i] && pivots[i])
+            dfs(i, i, start, end);
+    }
 }
 
 void *parallel(void* allthings){
