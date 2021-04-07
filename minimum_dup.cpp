@@ -15,6 +15,8 @@ using namespace std;
 
 int num_p;
 bool* visited;
+int** sim_nbrs;
+int* num_sim_nbrs;
 
 struct AllThings{
     int num_threads;
@@ -34,12 +36,7 @@ void *threadWork(void* allthings) {
     
     if (end > num_p)
         end = num_p;
-    for (int i = start; i < end; ++i) {
-        if (visited[i])
-            continue;
-        visited[i] = true;
-        dfs(i, i, num_sim_nbrs, sim_nbrs, visited, pivots, parent);
-    }
+    
 }
 
 int main(int argc, char** argv) {
@@ -53,6 +50,9 @@ int main(int argc, char** argv) {
     pthread_rwlock_init(&rwlock, NULL);
     pthread_mutex_init(&union_mutex, NULL);
 
+    num_sim_nbrs = (int*)calloc(num_vs, sizeof(int));
+    sim_nbrs = (int**)malloc(num_vs*sizeof(int));
+    
     for (thread = 0; thread < num_threads; thread++) {
         pthread_create(&thread_handles[thread], NULL, threadWork, (void *) new AllThings(num_threads, thread));
     }
