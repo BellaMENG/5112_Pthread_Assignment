@@ -137,18 +137,17 @@ void dfs(int curr_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *v
     cout << endl;
 }
 
-void *clusterPivots(void* allthings) {
-    cout << "in clusterPivots: " << sim_nbrs[14][0] << endl;
-    AllThings *all = (AllThings *) allthings;
+void clusterPivots(int start, int end) {
+//    AllThings *all = (AllThings *) allthings;
 //    pthread_rwlock_rdlock(&rwlock);
-    int local_n = global_num_vs/all->num_threads + 1;
-    int start = all->my_rank*local_n;
-    int end = (all->my_rank + 1)*local_n;
-    if (end > global_num_vs)
-        end = global_num_vs;
+//    int local_n = global_num_vs/all->num_threads + 1;
+//    int start = all->my_rank*local_n;
+//    int end = (all->my_rank + 1)*local_n;
+//    if (end > global_num_vs)
+//        end = global_num_vs;
     
     cout << "in clusterPivots: " << sim_nbrs[14][0] << endl;
-    for (int i = 0; i < global_num_vs; ++i) {
+    for (int i = start; i < end; ++i) {
         std::cout << "node " << i << ": " << pivots[i] << "   ";
         for (int j = 0; j < num_sim_nbrs[i]; ++j) {
             std::cout << sim_nbrs[i][j] << " ";
@@ -200,7 +199,10 @@ void *parallel(void* allthings){
             parent[i] = -1;
     }
     pthread_barrier_wait(&barrier);
+    clusterPivots(start, end);
+    pthread_barrier_wait(&barrier);
     // stage 2: cluster pivots
+    
     return 0;
 }
 
