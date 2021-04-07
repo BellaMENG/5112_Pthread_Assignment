@@ -204,6 +204,7 @@ void *parallel(void* allthings){
     pthread_barrier_wait(&barrier);
     cout << "here" << endl;
     cout << sim_nbrs[13][0] << endl;
+    cout << sim_nbrs[15][0] << endl;
     cout << sim_nbrs[14][0] << endl;
     clusterPivots(start, end);
     pthread_barrier_wait(&barrier);
