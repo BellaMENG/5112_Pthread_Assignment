@@ -213,7 +213,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     global_mu = mu;
     num_pivots = 0;
     
-    pivots = (bool*)malloc(num_vs*sizeof(bool));
+    pivots = (bool*)calloc(num_vs, sizeof(bool));
     num_sim_nbrs = (int*)calloc(num_vs, sizeof(int));
     sim_nbrs = (int**)malloc(num_vs*sizeof(int));
     
