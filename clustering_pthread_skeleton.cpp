@@ -191,6 +191,7 @@ void *parallel(void* allthings){
         cout << endl;
     }
     pthread_barrier_wait(&barrier);
+    cout << sim_nbrs[14][0] << endl;
     for (int i = start; i < end; ++i) {
         if (pivots[i])
             make_set(parent, i);
