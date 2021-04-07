@@ -29,7 +29,7 @@ int *parent = nullptr;
 //int *node2index = nullptr;
 pthread_rwlock_t    rwlock;
 pthread_mutex_t union_mutex;
-pthread_barrier_t barrier;
+//pthread_barrier_t barrier;
 
 using namespace std;
 
@@ -192,6 +192,7 @@ void *parallel(void* allthings){
         }
         cout << endl;
     }
+    pthread_barrier_wait(&barrier);
     for (int i = start; i < end; ++i) {
         if (pivots[i])
             make_set(parent, i);
@@ -222,7 +223,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
 
     pthread_rwlock_init(&rwlock, NULL);
     pthread_mutex_init(&union_mutex, NULL);
-    pthread_barrier_init(&barrier, NULL, num_threads);
+//    pthread_barrier_init(&barrier, NULL, num_threads);
     
     long thread;
     pthread_t* thread_handles = (pthread_t*) malloc(num_threads*sizeof(pthread_t));
@@ -246,7 +247,6 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     }
     
 #endif
-
     
 //    cout << sim_nbrs[14][0] << endl;
 //    for (thread = 0; thread < num_threads; thread++) {
@@ -257,13 +257,13 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
 //        pthread_join(thread_handles[thread], NULL);
 //    }
 #ifdef DEBUG
-    print_cluster_result(parent, num_vs);
-    print_cluster_result(parent, num_vs);
+//    print_cluster_result(parent, num_vs);
+//    print_cluster_result(parent, num_vs);
 #endif
     
     pthread_rwlock_destroy(&rwlock);
     pthread_mutex_destroy(&union_mutex);
-    pthread_barrier_destroy(&barrier);
+//    pthread_barrier_destroy(&barrier);
     free(thread_handles);
     return cluster_result;
 }
