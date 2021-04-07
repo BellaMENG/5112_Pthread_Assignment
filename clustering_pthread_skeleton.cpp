@@ -146,7 +146,8 @@ void *clusterPivots(void* allthings) {
     int end = (all->my_rank + 1)*local_n;
     if (end > global_num_vs)
         end = global_num_vs;
-
+    
+    cout << "in clusterPivots: " << sim_nbrs[12][0] << endl;
     for (int i = 0; i < global_num_vs; ++i) {
         std::cout << "node " << i << ": " << pivots[i] << "   ";
         for (int j = 0; j < num_sim_nbrs[i]; ++j) {
