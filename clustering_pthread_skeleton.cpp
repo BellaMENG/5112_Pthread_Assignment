@@ -77,12 +77,6 @@ void findPivots(int local_num_vs, int start, int end) {
 }
 
 
-void make_set(int* parent, int v) {
-//    pthread_rwlock_wrlock(&rwlock);
-    parent[v] = v;
-//    pthread_rwlock_unlock(&rwlock);
-}
-
 int find_set(int* parent, int v) {
     if (v == parent[v])
         return v;
@@ -90,7 +84,6 @@ int find_set(int* parent, int v) {
 }
 
 void union_sets(int* parent, int v, int w) {
-//    pthread_rwlock_wrlock(&rwlock);
     v = find_set(parent, v);
     w = find_set(parent, w);
     if (v != w) {
