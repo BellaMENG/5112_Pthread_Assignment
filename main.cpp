@@ -29,10 +29,6 @@ int main(int argc, char **argv) {
 
     auto start_clock = chrono::high_resolution_clock::now();
 
-//#ifdef DEBUG
-//    int cluster_result[1] = {-1};
-//    int num_clusters = 0;
-//#else
     int *cluster_result = scan(epsilon, mu, num_threads, num_vs, num_es, nbr_offs, nbrs);
 
     int num_clusters = 0;
@@ -40,16 +36,14 @@ int main(int argc, char **argv) {
         if (cluster_result[i] == i)
             num_clusters ++;
     }
-//#endif
-    
+
     auto end_clock = chrono::high_resolution_clock::now();
     chrono::duration<double> diff = end_clock - start_clock;
     printf("Elapsed Time: %.9lf s\n", diff.count());
     printf("Number of clusters: %d\n", num_clusters);
-#ifdef DEBUG
-#else
+
     string result_path("results/parallel.txt");
     write_result_to_file(num_vs, num_clusters, cluster_result, result_path);
-#endif
+
     return 0;
 }
