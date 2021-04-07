@@ -25,10 +25,12 @@ int **sim_nbrs = nullptr;
 bool *visited = nullptr;
 
 int *parent = nullptr;
-int *index2node = nullptr;
-int *node2index = nullptr;
+//int *index2node = nullptr;
+//int *node2index = nullptr;
 pthread_rwlock_t    rwlock;
-pthread_mutex_t mutex;
+pthread_mutex_t union_mutex;
+
+using namespace std;
 
 struct AllThings{
     int num_threads;
@@ -90,6 +92,7 @@ void union_sets(int* parent, int v, int w) {
 //    pthread_rwlock_wrlock(&rwlock);
     v = find_set(parent, v);
     w = find_set(parent, w);
+//    cout << "v: " << v << " w: " << w << endl;
 //    pthread_rwlock_unlock(&rwlock);
     if (v != w) {
 //        pthread_rwlock_wrlock(&rwlock);
@@ -115,34 +118,50 @@ void print_cluster_result(int* parent, int size) {
     cout << endl;
 }
 
-void dfs(int cur_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *visited, bool* pivots, int *parent) {
-    int node = index2node[cur_id];
-    for (int i = 0; i < num_sim_nbrs[node]; ++i) {
-        int nbr_id = sim_nbrs[node][i];
-        int nbr_index = node2index[nbr_id];
-        if ((pivots[nbr_id])&&(!visited[nbr_index])) {
-            visited[nbr_index] = true;
-            pthread_mutex_lock(&mutex);
-            union_sets(parent, cur_id, nbr_index);
-            pthread_mutex_unlock(&mutex);
+void dfs(int curr_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *visited, bool* pivots, int *parent) {
+    for (int i = 0; i < num_sim_nbrs[curr_id]; ++i) {
+        int nbr_id = sim_nbrs[curr_id][i];
+        
+        if (pivots[nbr_id] && !visited[nbr_id]) {
+            cout << "curr_id: " << curr_id << " nbr id: " << nbr_id << endl;
+            pthread_rwlock_wrlock(&rwlock);
+            visited[nbr_id] = true;
+//            cout << "visited " << nbr_id << endl;
+            union_sets(parent, curr_id, nbr_id);
+//            cout << "unioned: " << curr_id << " and " << nbr_id << endl;
+            pthread_rwlock_unlock(&rwlock);
             dfs(nbr_id, cluster_id, num_sim_nbrs, sim_nbrs, visited, pivots, parent);
         }
     }
+    cout << endl;
 }
 
 void *clusterPivots(void* allthings) {
+    cout << "in clusterPivots: " << sim_nbrs[12][0] << endl;
     AllThings *all = (AllThings *) allthings;
-    int local_num_pivots = num_pivots/all->num_threads + 1;
-    int start = all->my_rank*local_num_pivots;
-    int end = (all->my_rank + 1)*local_num_pivots;
-    if (end > num_pivots)
-        end = num_pivots;
+//    pthread_rwlock_rdlock(&rwlock);
+    int local_n = global_num_vs/all->num_threads + 1;
+    int start = all->my_rank*local_n;
+    int end = (all->my_rank + 1)*local_n;
+    if (end > global_num_vs)
+        end = global_num_vs;
+
+    for (int i = 0; i < global_num_vs; ++i) {
+        std::cout << "node " << i << ": " << pivots[i] << "   ";
+        for (int j = 0; j < num_sim_nbrs[i]; ++j) {
+            std::cout << sim_nbrs[i][j] << " ";
+        }
+        cout << endl;
+    }
     
+//    pthread_rwlock_unlock(&rwlock);
     for (int i = start; i < end; ++i) {
-        
-        if (visited[i])
+//        cout << "i: " << i << endl;
+        if (visited[i] || !pivots[i])
             continue;
+        pthread_rwlock_wrlock(&rwlock);
         visited[i] = true;
+        pthread_rwlock_unlock(&rwlock);
         dfs(i, i, num_sim_nbrs, sim_nbrs, visited, pivots, parent);
     }
     return 0;
@@ -162,15 +181,7 @@ void *parallel(void* allthings){
         end = global_num_vs;
     
     findPivots(local_num_vs, start, end);
-    // stage 2: expand the clusters from cores/pivots by DFS or BFS
-    // use DFS to traverse all pivots and assign cluster id to them
-    // problem is how to perform dfs with multi-thread
-    // Boost graph distributed algorithms
-    // use an array to record the connectivity
-    // agglomerative clustering?
-    // greedy agglomerative method introduced by Clauset et al.
-    
-    // how to remember the linking between different threads?
+    // stage 2: cluster pivots
     return 0;
 }
 
@@ -189,7 +200,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     sim_nbrs = (int**)malloc(num_vs*sizeof(int));
     
     pthread_rwlock_init(&rwlock, NULL);
-    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&union_mutex, NULL);
     
     long thread;
     pthread_t* thread_handles = (pthread_t*) malloc(num_threads*sizeof(pthread_t));
@@ -202,17 +213,6 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
         pthread_join(thread_handles[thread], NULL);
     }
     
-    index2node = (int*)malloc(num_pivots*sizeof(int));
-    node2index = (int*)malloc(num_pivots*sizeof(int));
-    int index = 0;
-    for (int i = 0; i < num_vs; ++i) {
-        if (pivots[i] == true) {
-            index2node[index] = i;
-            node2index[i] = index;
-            index++;
-        }
-    }
-
 #ifdef DEBUG
     cout << "global_num_vs: " << global_num_vs << endl;
     if (global_num_vs <= 50) {
@@ -221,16 +221,25 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
         }
         cout << endl;
     }
+    
+    for (int i = 0; i < global_num_vs; ++i) {
+        std::cout << "node " << i << ": " << pivots[i] << "   ";
+        for (int j = 0; j < num_sim_nbrs[i]; ++j) {
+            std::cout << sim_nbrs[i][j] << " ";
+        }
+        cout << endl;
+    }
 #endif
 
     parent = (int*)malloc(num_pivots * sizeof(int));
-    visited = new bool[num_pivots]();
-    
+    visited = new bool[num_vs]();
+
     for (int i = 0; i < num_pivots; ++i) {
         make_set(parent, i);
     }
     print_cluster_result(parent, num_pivots);
     
+    cout << sim_nbrs[12][0] << endl;
     for (thread = 0; thread < num_threads; thread++) {
         pthread_create(&thread_handles[thread], NULL, clusterPivots, (void *) new AllThings(num_threads, thread));
     }
@@ -239,17 +248,12 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
         pthread_join(thread_handles[thread], NULL);
     }
 #ifdef DEBUG
-//    if (global_num_vs <= 50) {
-//        for (int i = 0; i < num_pivots; ++i) {
-//            std::cout << index2node[i] << " ";
-//        }
-//        cout << endl;
-//    }
-//    print_cluster_result(parent, num_pivots);
+    print_cluster_result(parent, num_pivots);
+    print_cluster_result(parent, num_pivots);
 #endif
     
     pthread_rwlock_destroy(&rwlock);
-    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&union_mutex);
     free(thread_handles);
     return cluster_result;
 }

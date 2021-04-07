@@ -29,6 +29,7 @@ void expansion(int cur_id, int num_clusters, int *num_sim_nbrs, int **sim_nbrs,
     }
 }
 
+
 int main(int argc, char **argv) {
     assert(argc > 3 && "Usage: ./sequential <dataset_path> <epsilon> <mu>");
     
@@ -79,6 +80,14 @@ int main(int argc, char **argv) {
         }
         cout << endl;
     }
+    for (int i = 0; i < num_vs; ++i) {
+        std::cout << "node " << i << ": ";
+        for (int j = 0; j < num_sim_nbrs[i]; ++j) {
+            std::cout << sim_nbrs[i][j] << " ";
+        }
+        cout << endl;
+    }
+
 #endif
     // Stage 2:
     bool *visited = new bool[num_vs]();

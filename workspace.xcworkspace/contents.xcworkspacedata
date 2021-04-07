@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:minimum_dup.cpp">
+   </FileRef>
+   <FileRef
       location = "group:union_find.cpp">
    </FileRef>
    <FileRef
