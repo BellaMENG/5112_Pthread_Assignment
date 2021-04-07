@@ -236,7 +236,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     sim_nbrs = (int**)malloc(num_vs*sizeof(int));
     
     parent = (int*)calloc(num_vs, sizeof(int));
-    visited = new bool[num_vs]();
+    visited = (bool*)calloc(num_vs, sizeof(bool));
 
     pthread_rwlock_init(&rwlock, NULL);
     pthread_mutex_init(&union_mutex, NULL);
