@@ -111,7 +111,7 @@ void print_cluster_result(int* parent, int size) {
 void dfs(int curr_id, int cluster_id, int start, int end) {
     for (int i = 0; i < num_sim_nbrs[curr_id]; ++i) {
         int nbr_id = sim_nbrs[curr_id][i];
-        if (nbr_id > curr_id)
+        if (nbr_id < curr_id)
             continue;
 //        cout << "curr_id and nbr_id: " << curr_id << " " << nbr_id << endl;
         if (pivots[nbr_id] && !visited[nbr_id]) {
