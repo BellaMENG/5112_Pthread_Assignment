@@ -129,7 +129,7 @@ void dfs(int curr_id, int cluster_id, int start, int end) {
 }
 
 void clusterPivots(int start, int end) {
-    cout << parent[18] << endl;
+    
     for (int i = start; i < end; ++i) {
         if (visited[i] || !pivots[i])
             continue;
@@ -143,6 +143,7 @@ void clusterPivots(int start, int end) {
 }
 
 void clusteringEdges(int start, int end) {
+    cout << parent[18] << endl;
     for (int i = start; i < end; ++i) {
         if (!pivots[i])
             continue;
