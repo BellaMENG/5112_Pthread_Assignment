@@ -112,7 +112,7 @@ void dfs(int curr_id, int cluster_id, int start, int end) {
     pthread_rwlock_wrlock(&rwlock);
     visited[curr_id] = true;
     pthread_rwlock_unlock(&rwlock);
-    for (int i = 0; i < num_sim_nbrs[curr_id]; ++i) {
+    for (int i = num_sim_nbrs[curr_id] - 1; i >= 0; --i) {
         int nbr_id = sim_nbrs[curr_id][i];
         if (nbr_id < curr_id)
             continue;
