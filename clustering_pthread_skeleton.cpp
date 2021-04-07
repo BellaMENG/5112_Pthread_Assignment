@@ -160,7 +160,7 @@ void *parallel(void* allthings){
         start = global_num_vs - (all->num_threads - 1 - all->my_rank)*local_num_vs;
     }
     
-    int end = start + local_num_vs;
+    end = start + local_num_vs;
     
     findPivots(local_num_vs, start, end);
 
