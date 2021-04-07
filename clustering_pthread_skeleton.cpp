@@ -49,6 +49,7 @@ void findPivots(int local_num_vs, int start, int end) {
         int *left_end = &global_nbrs[global_nbr_offs[i + 1]];
         int left_size = left_end - left_start;
         
+        pthread_mutex_lock(&mutex);
         sim_nbrs[i] = new int[left_size];
         // loop over all neighbors of i
         for (int *j = left_start; j < left_end; j++) {
@@ -68,6 +69,7 @@ void findPivots(int local_num_vs, int start, int end) {
                 num_sim_nbrs[i]++;
             }
         }
+        pthread_mutex_unlock(&mutex);
         if (num_sim_nbrs[i] > global_mu) {
             num_pivots++;
             pivots[i] = true;
@@ -146,7 +148,6 @@ void clusterPivots(int start, int end) {
 //    if (end > global_num_vs)
 //        end = global_num_vs;
 
-    cout << "in clusterPivots: " << sim_nbrs[14][0] << endl;
     for (int i = start; i < end; ++i) {
         std::cout << "node " << i << ": " << pivots[i] << "   ";
         for (int j = 0; j < num_sim_nbrs[i]; ++j) {
@@ -200,7 +201,7 @@ void *parallel(void* allthings){
     }
     pthread_barrier_wait(&barrier);
     cout << "here" << endl;
-    cout << sim_nbrs[14][0] << endl;
+    cout << sim_nbrs[0][0] << endl;
     clusterPivots(start, end);
     pthread_barrier_wait(&barrier);
     // stage 2: cluster pivots
