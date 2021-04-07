@@ -108,7 +108,7 @@ void print_cluster_result(int* parent, int size) {
     cout << endl;
 }
 
-void dfs(int curr_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *visited, bool* pivots, int *parent) {
+void dfs(int curr_id, int cluster_id, int start, int end) {
     for (int i = 0; i < num_sim_nbrs[curr_id]; ++i) {
         int nbr_id = sim_nbrs[curr_id][i];
         
@@ -118,8 +118,8 @@ void dfs(int curr_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *v
             visited[nbr_id] = true;
             union_sets(parent, curr_id, nbr_id);
             pthread_rwlock_unlock(&rwlock);
-            
-            dfs(nbr_id, cluster_id, num_sim_nbrs, sim_nbrs, visited, pivots, parent);
+            if (start <= nbr_id && nbr_id < end)
+                dfs(nbr_id, cluster_id);
         }
     }
 }
@@ -132,7 +132,7 @@ void clusterPivots(int start, int end) {
         pthread_rwlock_wrlock(&rwlock);
         visited[i] = true;
         pthread_rwlock_unlock(&rwlock);
-        dfs(i, i, num_sim_nbrs, sim_nbrs, visited, pivots, parent);
+        dfs(i, i, start, end);
     }
 }
 
