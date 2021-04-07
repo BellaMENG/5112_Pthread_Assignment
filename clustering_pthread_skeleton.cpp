@@ -234,10 +234,11 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
         }
     }
     
-#ifdef DEBUG
-    print_cluster_result(parent, num_vs);
-#endif
+    for (int i = 0; i < num_vs; ++i) {
+        cout << cluster_result[i] << " ";
+    }
     
+    cout << endl;
     pthread_rwlock_destroy(&rwlock);
     pthread_mutex_destroy(&union_mutex);
     pthread_barrier_destroy(&barrier);
