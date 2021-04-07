@@ -147,12 +147,12 @@ void clusteringEdges(int start, int end) {
         if (!pivots[i])
             continue;
         for (int j = 0; j < num_sim_nbrs[i]; ++j) {
-            if (j <= i)
-                continue;
             int nbr_id = sim_nbrs[i][j];
+            if (nbr_id <= i)
+                continue;
             pthread_rwlock_wrlock(&rwlock);
-            cout << "union_set: " << curr_id << " and " << nbr_id << endl;
-            union_sets(parent, curr_id, nbr_id);
+            cout << "union_set: " << i << " and " << nbr_id << endl;
+            union_sets(parent, i, nbr_id);
             pthread_rwlock_unlock(&rwlock);
         }
     }
