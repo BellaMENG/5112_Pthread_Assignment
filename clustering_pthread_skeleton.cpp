@@ -228,7 +228,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     
     for (int i = 0; i < num_vs; ++i) {
         if (pivots[i]) {
-            cluster_result[i] = find_set(i);
+            cluster_result[i] = find_set(parent, i);
         } else {
             cluster_result[i] = -1;
         }
