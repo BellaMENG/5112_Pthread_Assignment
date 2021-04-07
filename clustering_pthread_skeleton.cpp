@@ -109,6 +109,9 @@ void print_cluster_result(int* parent, int size) {
 }
 
 void dfs(int curr_id, int cluster_id, int start, int end) {
+    pthread_rwlock_wrlock(&rwlock);
+    visited[curr_id] = true;
+    pthread_rwlock_unlock(&rwlock);
     for (int i = 0; i < num_sim_nbrs[curr_id]; ++i) {
         int nbr_id = sim_nbrs[curr_id][i];
         if (nbr_id < curr_id)
@@ -116,7 +119,6 @@ void dfs(int curr_id, int cluster_id, int start, int end) {
 //        cout << "curr_id and nbr_id: " << curr_id << " " << nbr_id << endl;
         if (pivots[nbr_id] && !visited[nbr_id]) {
             pthread_rwlock_wrlock(&rwlock);
-            visited[nbr_id] = true;
             cout << "union_set: " << curr_id << " and " << nbr_id << endl;
             union_sets(parent, curr_id, nbr_id);
             pthread_rwlock_unlock(&rwlock);
