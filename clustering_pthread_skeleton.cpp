@@ -192,15 +192,6 @@ void *parallel(void* allthings){
         cout << endl;
     }
     pthread_barrier_wait(&barrier);
-//    cout << sim_nbrs[14][0] << endl;
-    
-//    for (int i = start; i < end; ++i) {
-//        if (pivots[i])
-//            make_set(parent, i);
-//        else
-//            parent[i] = -1;
-//    }
-//    pthread_mutex_lock(&union_mutex);
     for (int i = start; i < end; ++i) {
         if (pivots[i]) {
             parent[i] = i;
@@ -275,7 +266,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
 //        pthread_join(thread_handles[thread], NULL);
 //    }
 #ifdef DEBUG
-//    print_cluster_result(parent, num_vs);
+    print_cluster_result(parent, num_vs);
 //    print_cluster_result(parent, num_vs);
 #endif
     
