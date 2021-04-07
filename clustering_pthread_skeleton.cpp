@@ -19,6 +19,7 @@ int global_num_vs, global_num_es, *global_nbr_offs = nullptr, *global_nbrs = nul
 float global_epsilon;
 int global_mu;
 int num_pivots;
+int num_sim_edges;
 bool *pivots = nullptr;
 int *num_sim_nbrs = nullptr;
 int **sim_nbrs = nullptr;
@@ -141,6 +142,22 @@ void clusterPivots(int start, int end) {
     }
 }
 
+void clusteringEdges(int start, int end) {
+    for (int i = start; i < end; ++i) {
+        if (!pivots[i])
+            continue;
+        for (int j = 0; j < num_sim_nbrs[i]; ++j) {
+            if (j <= i)
+                continue;
+            int nbr_id = sim_nbrs[i][j];
+            pthread_rwlock_wrlock(&rwlock);
+            cout << "union_set: " << curr_id << " and " << nbr_id << endl;
+            union_sets(parent, curr_id, nbr_id);
+            pthread_rwlock_unlock(&rwlock);
+        }
+    }
+}
+
 void *parallel(void* allthings){
     AllThings *all = (AllThings *) allthings;
         
@@ -171,7 +188,8 @@ void *parallel(void* allthings){
     }
     
     pthread_barrier_wait(&barrier);
-    clusterPivots(start, end);
+    clusteringEdges(start, end);
+//    clusterPivots(start, end);
     pthread_barrier_wait(&barrier);
 
     // stage 2: cluster pivots
