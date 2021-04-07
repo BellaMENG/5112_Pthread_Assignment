@@ -165,7 +165,6 @@ void clusterPivots(int start, int end) {
         pthread_rwlock_unlock(&rwlock);
         dfs(i, i, num_sim_nbrs, sim_nbrs, visited, pivots, parent);
     }
-    return 0;
 }
 
 
@@ -199,6 +198,7 @@ void *parallel(void* allthings){
             parent[i] = -1;
     }
     pthread_barrier_wait(&barrier);
+    cout << "here" << endl;
     clusterPivots(start, end);
     pthread_barrier_wait(&barrier);
     // stage 2: cluster pivots
