@@ -120,7 +120,6 @@ void dfs(int curr_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *v
         int nbr_id = sim_nbrs[curr_id][i];
         
         if (pivots[nbr_id] && !visited[nbr_id]) {
-            cout << "curr_id: " << curr_id << " nbr id: " << nbr_id << endl;
             pthread_rwlock_wrlock(&rwlock);
             visited[nbr_id] = true;
             union_sets(parent, curr_id, nbr_id);
@@ -128,20 +127,10 @@ void dfs(int curr_id, int cluster_id, int *num_sim_nbrs, int **sim_nbrs, bool *v
             dfs(nbr_id, cluster_id, num_sim_nbrs, sim_nbrs, visited, pivots, parent);
         }
     }
-    cout << endl;
 }
 
 void clusterPivots(int start, int end) {
 
-    /*
-    for (int i = start; i < end; ++i) {
-        std::cout << "node " << i << ": " << pivots[i] << "   ";
-        for (int j = 0; j < num_sim_nbrs[i]; ++j) {
-            std::cout << sim_nbrs[i][j] << " ";
-        }
-        cout << endl;
-    }
-     */
     
     for (int i = start; i < end; ++i) {
         if (visited[i] || !pivots[i])
@@ -167,15 +156,7 @@ void *parallel(void* allthings){
         end = global_num_vs;
     
     findPivots(local_num_vs, start, end);
-    pthread_barrier_wait(&barrier);
-    
-    for (int i = start; i < end; ++i) {
-        std::cout << "node " << i << ": " << pivots[i] << "   ";
-        for (int j = 0; j < num_sim_nbrs[i]; ++j) {
-            std::cout << sim_nbrs[i][j] << " ";
-        }
-        cout << endl;
-    }
+
     pthread_barrier_wait(&barrier);
     for (int i = start; i < end; ++i) {
         if (pivots[i]) {
@@ -233,12 +214,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
             cluster_result[i] = -1;
         }
     }
-    
-    for (int i = 0; i < num_vs; ++i) {
-        cout << cluster_result[i] << " ";
-    }
-    
-    cout << endl;
+        
     pthread_rwlock_destroy(&rwlock);
     pthread_mutex_destroy(&union_mutex);
     pthread_barrier_destroy(&barrier);
