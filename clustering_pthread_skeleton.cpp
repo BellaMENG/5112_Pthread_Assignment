@@ -150,11 +150,17 @@ void *parallel(void* allthings){
     // hints: union-found, set prioriteis, drawer principles
     // two stages:
     // stage 1: find the cores/pivots
-    int local_num_vs = global_num_vs/all->num_threads + 1;
-    int start = all->my_rank*local_num_vs;
-    int end = (all->my_rank + 1)*local_num_vs;
-    if (end > global_num_vs)
-        end = global_num_vs;
+    int local_num_vs = global_num_vs/all->num_threads;
+    int remainder = global_num_vs % all->num_threads;
+    int start, end;
+    if (all->my_rank < remainder) {
+        local_num_vs++;
+        start = all->my_rank * local_num_vs;
+    } else {
+        start = global_num_vs - (all->num_threads - 1 - all->my_rank)*local_num_vs;
+    }
+    
+    int end = start + local_num_vs;
     
     findPivots(local_num_vs, start, end);
 
