@@ -153,7 +153,7 @@ void clusteringEdges(int start, int end) {
             pthread_rwlock_wrlock(&rwlock);
             cout << "union_set: " << i << " and " << nbr_id << endl;
             union_sets(parent, i, nbr_id);
-            cout << parent[18] << endl;
+            cout << parent[21] << endl;
             pthread_rwlock_unlock(&rwlock);
         }
     }
