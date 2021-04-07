@@ -119,7 +119,7 @@ void dfs(int curr_id, int cluster_id, int start, int end) {
             union_sets(parent, curr_id, nbr_id);
             pthread_rwlock_unlock(&rwlock);
             if (start <= nbr_id && nbr_id < end)
-                dfs(nbr_id, cluster_id);
+                dfs(nbr_id, cluster_id, start, end);
         }
     }
 }
