@@ -108,7 +108,7 @@ void union_sets(int* parent, int v, int w) {
 }
 
 void print_parent() {
-    for (int i = 0; i < num_pivots; ++i) {
+    for (int i = 0; i < global_num_vs; ++i) {
         cout << parent[i] << " ";
     }
     cout << endl;
@@ -226,6 +226,7 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     sim_nbrs = (int**)malloc(num_vs*sizeof(int));
     
     parent = (int*)malloc(num_vs * sizeof(int));
+    parent.fill(-1);
     visited = new bool[num_vs]();
 
     pthread_rwlock_init(&rwlock, NULL);
