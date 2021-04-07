@@ -150,7 +150,7 @@ void *parallel(void* allthings){
         local_num_vs++;
         start = all->my_rank * local_num_vs;
     } else {
-        start = global_num_vs - (all->num_threads - 1 - all->my_rank)*local_num_vs;
+        start = global_num_vs - (all->num_threads - all->my_rank)*local_num_vs;
     }
     
     end = start + local_num_vs;
