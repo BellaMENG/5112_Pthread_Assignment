@@ -33,10 +33,12 @@ using namespace std;
 struct AllThings{
     int num_threads;
     int my_rank;
+    int* cluster_result;
     
-    AllThings(int inum_threads, int imy_rank){
+    AllThings(int inum_threads, int imy_rank, int* icluster_result = nullptr){
         num_threads = inum_threads;
         my_rank = imy_rank;
+        cluster_result = icluster_result;
     };
 };
 
@@ -106,6 +108,16 @@ void clusteringEdges(int start, int end) {
     }
 }
 
+void clusteringResult(int* cluster_result, int start, int end) {
+    for (int i = start; i < end; ++i) {
+        if (pivots[i]) {
+            cluster_result[i] = find_set(parent, i);
+        } else {
+            cluster_result[i] = -1;
+        }
+    }
+}
+
 void *parallel(void* allthings){
     AllThings *all = (AllThings *) allthings;
         
@@ -137,6 +149,9 @@ void *parallel(void* allthings){
     pthread_barrier_wait(&barrier);
     // stage 2: cluster pivots
     clusteringEdges(start, end);
+    pthread_barrier_wait(&barrier);
+    // stage 3: get results
+    clusteringResult(all->cluster_result, start, end);
 
     return 0;
 }
@@ -165,21 +180,13 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     pthread_t* thread_handles = (pthread_t*) malloc(num_threads*sizeof(pthread_t));
     int *cluster_result = new int[num_vs];
     for (thread = 0; thread < num_threads; thread++) {
-        pthread_create(&thread_handles[thread], NULL, parallel, (void *) new AllThings(num_threads, thread));
+        pthread_create(&thread_handles[thread], NULL, parallel, (void *) new AllThings(num_threads, thread, cluster_result));
     }
     
     for (thread = 0; thread < num_threads; thread++) {
         pthread_join(thread_handles[thread], NULL);
     }
-    
-    for (int i = 0; i < num_vs; ++i) {
-        if (pivots[i]) {
-            cluster_result[i] = find_set(parent, i);
-        } else {
-            cluster_result[i] = -1;
-        }
-    }
-        
+            
     pthread_rwlock_destroy(&rwlock);
     pthread_barrier_destroy(&barrier);
     free(thread_handles);
