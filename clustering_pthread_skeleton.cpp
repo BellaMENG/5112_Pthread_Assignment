@@ -22,7 +22,6 @@ int num_sim_edges;
 bool *pivots = nullptr;
 int *num_sim_nbrs = nullptr;
 int **sim_nbrs = nullptr;
-bool *visited = nullptr;
 
 int *parent = nullptr;
 pthread_rwlock_t    rwlock;
@@ -171,7 +170,6 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     sim_nbrs = (int**)malloc(num_vs*sizeof(int*));
     
     parent = (int*)calloc(num_vs, sizeof(int));
-    visited = (bool*)calloc(num_vs, sizeof(bool));
 
     pthread_rwlock_init(&rwlock, NULL);
     pthread_barrier_init(&barrier, NULL, num_threads);
@@ -190,6 +188,13 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     pthread_rwlock_destroy(&rwlock);
     pthread_barrier_destroy(&barrier);
     free(thread_handles);
+    for (auto i = 0; i < num_vs; i++) {
+        free(sim_nbrs[i]);
+    }
+    free(sim_nbrs);
+    free(pivots);
+    free(num_sim_nbrs);
+    free(parent);
     return cluster_result;
 }
 
