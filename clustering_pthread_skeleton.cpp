@@ -11,7 +11,6 @@
  */
 
 #include <pthread.h>
-#include <boost/pending/detail/disjoint_sets.hpp>
 #include "clustering.h"
 
 int global_num_vs, global_num_es, *global_nbr_offs = nullptr, *global_nbrs = nullptr;
@@ -110,9 +109,7 @@ void clusteringEdges(int start, int end) {
 void *parallel(void* allthings){
     AllThings *all = (AllThings *) allthings;
         
-    // hints: union-found, set prioriteis, drawer principles
-    // two stages:
-    // stage 1: find the cores/pivots
+    
     int local_num_vs = global_num_vs/all->num_threads;
     int remainder = global_num_vs % all->num_threads;
     int start, end;
@@ -125,6 +122,7 @@ void *parallel(void* allthings){
     
     end = start + local_num_vs;
     
+    // stage 1: find the cores/pivots
     findPivots(local_num_vs, start, end);
 
     pthread_barrier_wait(&barrier);
@@ -137,12 +135,9 @@ void *parallel(void* allthings){
     }
     
     pthread_barrier_wait(&barrier);
-    clusteringEdges(start, end);
-//    clusterPivots(start, end);
-    pthread_barrier_wait(&barrier);
-
     // stage 2: cluster pivots
-    
+    clusteringEdges(start, end);
+
     return 0;
 }
 
