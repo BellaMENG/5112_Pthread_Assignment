@@ -27,7 +27,6 @@ bool *visited = nullptr;
 
 int *parent = nullptr;
 pthread_rwlock_t    rwlock;
-pthread_mutex_t union_mutex;
 pthread_barrier_t barrier;
 
 using namespace std;
@@ -48,7 +47,6 @@ void findPivots(int local_num_vs, int start, int end) {
         int *left_end = &global_nbrs[global_nbr_offs[i + 1]];
         int left_size = left_end - left_start;
         
-//        pthread_mutex_lock(&union_mutex);
         sim_nbrs[i] = new int[left_size];
         // loop over all neighbors of i
         for (int *j = left_start; j < left_end; j++) {
@@ -68,7 +66,6 @@ void findPivots(int local_num_vs, int start, int end) {
                 num_sim_nbrs[i]++;
             }
         }
-//        pthread_mutex_unlock(&union_mutex);
         if (num_sim_nbrs[i] > global_mu) {
             num_pivots++;
             pivots[i] = true;
@@ -94,21 +91,6 @@ void union_sets(int* parent, int v, int w) {
             parent[w] = v;
     }
 }
-
-void print_parent() {
-    for (int i = 0; i < global_num_vs; ++i) {
-        cout << parent[i] << " ";
-    }
-    cout << endl;
-}
-
-void print_cluster_result(int* parent, int size) {
-    for (int i = 0; i < size; ++i) {
-        cout << find_set(parent, i) << " ";
-    }
-    cout << endl;
-}
-
 
 void clusteringEdges(int start, int end) {
     for (int i = start; i < end; ++i) {
@@ -182,7 +164,6 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     visited = (bool*)calloc(num_vs, sizeof(bool));
 
     pthread_rwlock_init(&rwlock, NULL);
-    pthread_mutex_init(&union_mutex, NULL);
     pthread_barrier_init(&barrier, NULL, num_threads);
     
     long thread;
@@ -205,7 +186,6 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     }
         
     pthread_rwlock_destroy(&rwlock);
-    pthread_mutex_destroy(&union_mutex);
     pthread_barrier_destroy(&barrier);
     free(thread_handles);
     return cluster_result;
