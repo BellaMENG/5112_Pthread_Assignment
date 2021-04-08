@@ -48,7 +48,7 @@ void findPivots(int local_num_vs, int start, int end) {
         int *left_end = &global_nbrs[global_nbr_offs[i + 1]];
         int left_size = left_end - left_start;
         
-        pthread_mutex_lock(&union_mutex);
+//        pthread_mutex_lock(&union_mutex);
         sim_nbrs[i] = new int[left_size];
         // loop over all neighbors of i
         for (int *j = left_start; j < left_end; j++) {
@@ -68,7 +68,7 @@ void findPivots(int local_num_vs, int start, int end) {
                 num_sim_nbrs[i]++;
             }
         }
-        pthread_mutex_unlock(&union_mutex);
+//        pthread_mutex_unlock(&union_mutex);
         if (num_sim_nbrs[i] > global_mu) {
             num_pivots++;
             pivots[i] = true;
