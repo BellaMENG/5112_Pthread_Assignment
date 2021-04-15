@@ -17,7 +17,6 @@ int global_num_vs, global_num_es, *global_nbr_offs = nullptr, *global_nbrs = nul
 
 float global_epsilon;
 int global_mu;
-int num_pivots;
 int num_sim_edges;
 bool *pivots = nullptr;
 int *num_sim_nbrs = nullptr;
@@ -67,7 +66,6 @@ void findPivots(int local_num_vs, int start, int end) {
             }
         }
         if (num_sim_nbrs[i] > global_mu) {
-            num_pivots++;
             pivots[i] = true;
         }
     }
@@ -163,7 +161,6 @@ int *scan(float epsilon, int mu, int num_threads, int num_vs, int num_es, int *n
     global_nbrs = nbrs;
     global_epsilon = epsilon;
     global_mu = mu;
-    num_pivots = 0;
     
     pivots = (bool*)calloc(num_vs, sizeof(bool));
     num_sim_nbrs = (int*)calloc(num_vs, sizeof(int));
