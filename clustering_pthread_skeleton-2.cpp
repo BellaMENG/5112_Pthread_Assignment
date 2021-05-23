@@ -1,7 +1,7 @@
 /*
- * Name: MENG Zihan
- * Student id: 20412027
- * ITSC email: zmengaa@connect.ust.hk
+ * Name: #### ######
+ * Student id: #######
+ * ITSC email: ############
  *
  * Please only change this file and do not change any other files.
  * Feel free to change/add any helper functions.
